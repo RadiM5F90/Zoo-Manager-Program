@@ -1,0 +1,8 @@
+//
+// Created by Radimir Mignogna on 18.08.2026.
+//
+
+#ifndef PROJECT_DEMO_DIRECTED_GRAPH_H
+#define PROJECT_DEMO_DIRECTED_GRAPH_H
+
+#endif //PROJECT_DEMO_DIRECTED_GRAPH_H
