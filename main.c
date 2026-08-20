@@ -7,6 +7,7 @@ const char* animal_name[] = {"Simba", "Rajah", "Galena", "Rio", "Kaa", "Shelly"}
 int main() {
 
 
+/*
     // Animals hashmap test
     hashmap hashAnimals = hashmap_create(10);
 
@@ -29,7 +30,7 @@ int main() {
 
 
     // Areas hashmap test
-
+*/
 
 
     return 0;

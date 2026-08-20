@@ -12,4 +12,8 @@ add_executable(Project_Demo main.c
         zooManager.h
         directed_graph.c
         directed_graph.h
+        list_stack.c
+        list_stack.h
+        list_queue.c
+        list_queue.h
 )
