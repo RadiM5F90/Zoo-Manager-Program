@@ -3,10 +3,10 @@
 
 #include "linked_list.h"
 
-#define DIRECT_GRAPH_SUCCESS 0;
-#define DIRECT_GRAPH_ERROR_NULL -1;
-#define DIRECT_GRAPH_ERROR_INVALID_ID -2;
-#define DIRECT_GRAPH_ERROR_MEMORY -3;
+#define DIRECT_GRAPH_SUCCESS 0
+#define DIRECT_GRAPH_ERROR_NULL -1
+#define DIRECT_GRAPH_ERROR_INVALID_ID -2
+#define DIRECT_GRAPH_ERROR_MEMORY -3
 
 typedef struct _direct_graph* direct_graph;
 typedef int node_id;
@@ -15,9 +15,9 @@ direct_graph direct_graph_create(int _max_size);
 
 void direct_graph_destroy(direct_graph* _graph);
 
-node_id add_node(direct_graph _graph, int value);
+node_id add_node(direct_graph _graph, void* value);
 
-int get_value(direct_graph _graph, node_id _node, int* _value_out);
+int get_value(direct_graph _graph, node_id _node, void** _value_out);
 
 int add_edge(direct_graph _graph, node_id _src, node_id _dst);
 
