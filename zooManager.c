@@ -119,7 +119,7 @@ int verificaSpecie(direct_graph specieAnimali, node_id _specie, node_id _famigli
 
 int aggiungiArea(zooManager _manager, char* codice, char* nome, char* tipologia, int maxCapacity) {
     if (codice == NULL || nome == NULL || tipologia == NULL) return ZOO_ERROR_NULL;
-    if (maxCapacity <= 0) return ZOO_ERROR_CAPACITY;
+    if (maxCapacity < 0) return ZOO_ERROR_CAPACITY;
 
     // Controlla se l'area esiste già
     if (hashmap_has_key(_manager->aree, codice)) return ZOO_ERROR_AREA;
