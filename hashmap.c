@@ -4,7 +4,7 @@
 
 typedef struct _entity {
     char* key;
-    int value;
+    void* value;
 }* entity;
 
 struct _hashmap {
@@ -55,7 +55,7 @@ void hashmap_destroy(hashmap* _map) {
     *_map = NULL;
 }
 
-int hashmap_set(hashmap _map, char* _key, int _value) {
+int hashmap_set(hashmap _map, char* _key, void* _value) {
     if (_map == NULL) return HASHMAP_ERROR_NULL;
     if (_key == NULL) return HASHMAP_ERROR_KEY;
 
@@ -89,7 +89,7 @@ int hashmap_set(hashmap _map, char* _key, int _value) {
     return HASHMAP_SUCCESS;
 }
 
-int hashmap_get(hashmap _map, char* _key, int* _value_out) {
+int hashmap_get(hashmap _map, char* _key, void** _value_out) {
     if (_map == NULL || _value_out == NULL) return HASHMAP_ERROR_NULL;
     if (_key == NULL) return HASHMAP_ERROR_KEY;
 

@@ -58,12 +58,13 @@ int main() {
     add_edge(grafoClassificazione, Giraffidi, giraffa);
 
 
-    /*
+
     printf("DFS from node n1: ");
     list _dfs = direct_graph_dfs(grafoClassificazione, classificazione);
     print_node_list(grafoClassificazione, _dfs, print_string);
     list_destroy(&_dfs);
-    */
+
+
 
     printf("BFS from node n1: ");
     list _bfs = direct_graph_bfs(grafoClassificazione, classificazione);

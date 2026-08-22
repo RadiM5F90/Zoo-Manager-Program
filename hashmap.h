@@ -1,6 +1,7 @@
 #ifndef PROJECT_DEMO_HASHMAP_H
 #define PROJECT_DEMO_HASHMAP_H
 
+// GENERIC HASHMAP
 
 #include <stdbool.h>
 #include "linked_list.h"
@@ -38,7 +39,7 @@ void hashmap_destroy(hashmap* _map);
  *         HASHMAP_ERROR_KEY if _key is NULL,
  *         HASHMAP_ERROR_MEMORY if there is a memory error.
  */
-int hashmap_set(hashmap _map, char* _key, int _value);
+int hashmap_set(hashmap _map, char* _key, void* _value);
 
 /*
  * Reads the value associated with a key.
@@ -50,7 +51,7 @@ int hashmap_set(hashmap _map, char* _key, int _value);
  *         HASHMAP_ERROR_KEY if _key is NULL,
  *         HASHMAP_ERROR_NOT_FOUND if the key does not exist.
  */
-int hashmap_get(hashmap _map, char* _key, int* _value_out);
+int hashmap_get(hashmap _map, char* _key, void** _value_out);
 
 /*
  * Checks if a specific key is in the table.
