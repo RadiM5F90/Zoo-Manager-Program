@@ -14,15 +14,15 @@ typedef enum {ALTA, MEDIA, BASSA} priorita;
 
 
 struct _zooManager {
-    //tree classificazione;          // Albero che organizza gerarchicamente gli animali, le specie, famiglie...
+    direct_graph classificazione;          // Grafo diretto che organizza gerarchicamente gli animali, le specie, famiglie...
     hashmap aree;
     hashmap animali;
 
-   // stack richiesteEffettuate;     // Stack in cui inserire le richieste effettuate
+    stack richiesteEffettuate;     // Stack in cui inserire le richieste effettuate
 
-   // queue alta;                    // Richieste con priorità alta
-   // queue media;                   // Priorità media
-   // queue bassa;                   // Priorità bassa
+    queue alta;                    // Richieste con priorità alta
+    queue media;                   // Priorità media
+    queue bassa;                   // Priorità bassa
 };
 
 struct _animale {
@@ -97,7 +97,46 @@ zooManager zooManager_create() {
     zooManager manager = malloc(sizeof(struct _zooManager));
     if (manager == NULL) return NULL;
 
-    //manager->classificazione = tree_create();
+    manager->classificazione = direct_graph_create(100);
     manager->aree = hashmap_create(100);
+
+    manager->richiesteEffettuate = create_stack(100);
+
+    manager->alta = create_queue(100);
+    manager->media = create_queue(100);
+    manager->bassa = create_queue(100);
+
     return manager;
 }
+
+int aggiungiElemento(direct_graph specieAnimali, node_id _padre, node_id _animale) {
+    return ZOO_SUCCESS;
+}
+
+int verificaSpecie(direct_graph specieAnimali, node_id _specie, node_id _famiglia) {
+    return ZOO_SUCCESS;
+}
+
+int aggiungiArea(zooManager _manager, char* codice, char* nome, char* tipologia, int maxCapacity) {
+    if (codice == NULL || nome == NULL || tipologia == NULL) return ZOO_ERROR_NULL;
+    if (maxCapacity <= 0) return ZOO_ERROR_CAPACITY;
+
+    // Controlla se l'area esiste già
+    if (hashmap_has_key(_manager->aree, codice)) return ZOO_ERROR_AREA;
+
+    area _area = malloc(sizeof(struct _area));
+    if (_area == NULL) return ZOO_ERROR_ALLOC;
+
+    strcpy(_area->codice, codice);
+    strcpy(_area->nome, nome);
+    strcpy(_area->tipologia, tipologia);
+
+    _area->maxCapacity = maxCapacity;
+    _area->currentAnimalNumber = 0;
+
+    //###### Fix this ##########
+    hashmap_set(_manager->aree, codice, _area);
+
+    return ZOO_SUCCESS;
+}
+

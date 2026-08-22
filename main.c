@@ -6,7 +6,6 @@ typedef enum {SIMBA, RAJAH, GALENA, RIO, KAA, SHELLY} animali;
 const char* animal_name[] = {"Simba", "Rajah", "Galena", "Rio", "Kaa", "Shelly"};
 
 
-// ####### TURN print_node_list GENERIC #########
 
 void print_node_list(direct_graph _g, const list _list, void(*print_value)(void*)) {
     iterator it = list_iterator_create(_list);
