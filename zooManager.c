@@ -10,7 +10,8 @@ typedef enum {SANO, OSSERVAZIONE, IN_CURA, QUARANTENA} statoSalute;
 typedef enum {VISITA_VETERINARIA, ALIMENTAZIONE, TRASFERIMENTO_ANIMALE, MANUTENZIONE_RECINTO, ASSISTENZA_VISITATORI} tipoRichiesta;
 typedef enum {ALTA, MEDIA, BASSA} priorita;
 
-
+// Helper private function to find an element in the graph
+int findElement(direct_graph _graph, node_id _element);
 
 
 struct _zooManager {
@@ -26,7 +27,7 @@ struct _zooManager {
 };
 
 struct _animale {
-    char id[20];
+    char codice[20];       // Numero identificativo
     char nome[50];
     char specie[50];
     int eta;
@@ -52,6 +53,9 @@ struct _area {
     char tipologia[50];         // Tipo di area
     int maxCapacity;            // Capacità massima dell'area
     int currentAnimalNumber;    // Num corrente di animali ospitati
+
+    // Nuova aggiunta: hashmap contenete gli animali presenti nell'area
+    hashmap animaliPresenti;
 };
 
 // per ripristinare lo stato precedente di una richiesta
@@ -110,6 +114,11 @@ zooManager zooManager_create() {
 }
 
 int aggiungiElemento(direct_graph specieAnimali, node_id _padre, node_id _animale) {
+    // To add a new element, take a graph and add a new node
+    // take the _padre, create a new node, and add an edge between _padre and _animale
+    // Use the BFS/DFS to find _padre, if not found return error, else add a new node and an edge
+
+
     return ZOO_SUCCESS;
 }
 
@@ -134,9 +143,49 @@ int aggiungiArea(zooManager _manager, char* codice, char* nome, char* tipologia,
     _area->maxCapacity = maxCapacity;
     _area->currentAnimalNumber = 0;
 
-    //###### Fix this ##########
     hashmap_set(_manager->aree, codice, _area);
 
     return ZOO_SUCCESS;
 }
 
+// ##### CHECK IF THIS FUNCTION WORKS ########
+int aggiungiAnimale(zooManager _manager, char* codice, char* nome, char* specie, int eta, char* areaIniziale, char* statoSalute) {
+    if (codice == NULL || nome == NULL || specie == NULL || areaIniziale == NULL || statoSalute == NULL) return ZOO_ERROR_NULL;
+
+    // Controlla se l'animale è già presente
+    // Cerca l'animale nella hashmap "animali" dello zooManager
+    if (hashmap_has_key(_manager->animali, codice)) return ZOO_ERROR_ANIMAL;
+
+    animale nuovoAnimale = malloc(sizeof(struct _animale));
+    if (nuovoAnimale == NULL) return ZOO_ERROR_ALLOC;
+
+    strcpy(nuovoAnimale->codice, codice);
+    strcpy(nuovoAnimale->nome, nome);
+    strcpy(nuovoAnimale->specie, specie);
+    nuovoAnimale->eta = eta;
+
+    // Se l'area in cui inserire l'animale è già presente, inserisce l'animale in quell'area
+    // Cerca il nome dell'area del nuovoAnimale, nella hashmap "aree" dello zooManager
+    if (hashmap_has_key(_manager->aree, nuovoAnimale->area->nome)) {
+        // Se la maxCapacity dell'area è stata raggiunta, non permette l'inserimento di un nuovo animale
+        if (nuovoAnimale->area->maxCapacity >= nuovoAnimale->area->maxCapacity) {
+            printf("\nCapacità dell'area raggiunta!\n");
+            return ZOO_ERROR_CAPACITY;
+        }
+        // Altrimenti inserisce il nuovo animale nella hashmap animaliPresenti della rispettiva area
+        hashmap_set(nuovoAnimale->area->animaliPresenti, nuovoAnimale->codice, nuovoAnimale->nome);
+    }
+
+    // Aggiunge il nuovo animale alla hashmap animali dello zooManager
+    // (key = codice, value = nome del nuovo animale)
+    hashmap_set(_manager->animali, codice, nuovoAnimale->nome);
+
+    return ZOO_SUCCESS;
+}
+
+// Helper function to find an element in the graph
+int findElement(direct_graph _graph, node_id _element) {
+    if (_graph == NULL) return ZOO_ERROR_NULL;
+
+
+}

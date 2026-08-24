@@ -20,31 +20,21 @@
 #define ZOO_ERROR_CAPACITY -8;
 
 
-// Structs
 typedef struct _zooManager* zooManager;
-
 typedef struct _animale* animale;
-
 typedef struct _richiesta* richiesta;
-
 typedef struct _area* area;
-
 typedef struct _operazione* operazione;
 
 
-
-
-
-// Functions
-
-/*
+/* F0
  * Crea un nuovo gestore dello zoo. Alloca memoria per un nuovo zoo.
  * @return NULL se c'è stato un errore durante l'allocazione della memoria,
  *         o restituisce il nuovo zoo creato.
  */
 zooManager zooManager_create();
 
-/*
+/* F1
  * Aggiunge un nuovo elemento alla classificazione degli animali
  * @param _specieAnimali Grafo in cui inserire il nuovo elemento
  * @param _padre Elemento padre
@@ -55,7 +45,7 @@ zooManager zooManager_create();
  */
 int aggiungiElemento(direct_graph specieAnimali, node_id _padre, node_id _animale);
 
-/*
+/* F2
  * Verifica se una specie appartiene a una determinata famiglia o categoria.
  * @param specieAnimali Grafo su cui operare.
  * @param _specie Specie da controllare.
@@ -66,7 +56,7 @@ int aggiungiElemento(direct_graph specieAnimali, node_id _padre, node_id _animal
  */
 int verificaSpecie(direct_graph specieAnimali, node_id _specie, node_id _famiglia);
 
-/*
+/* F3
  * Aggiunge una nuova area dello zoo.
  * L'area è di tipo struct _area. Crea una nuova area, e la inizializza con i valori passati come parametri.
  * Dato che l'area è nuova e appena aggiunta, currentAnimalNumber sarà 0.
@@ -78,6 +68,9 @@ int verificaSpecie(direct_graph specieAnimali, node_id _specie, node_id _famigli
 int aggiungiArea(zooManager _manager, char* codice, char* nome, char* tipologia, int maxCapacity);
 
 
-
+/* F4
+ *
+ */
+int aggiungiAnimale(zooManager _manager, char* codice, char* nome, char* specie, int eta, char* areaIniziale, char* statoSalute);
 
 #endif
