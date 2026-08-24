@@ -36,6 +36,7 @@ zooManager zooManager_create();
 
 /* F1
  * Aggiunge un nuovo elemento alla classificazione degli animali
+ * Prende l'animale/categoria già creati e lo aggiunge alla classificazione
  * @param _specieAnimali Grafo in cui inserire il nuovo elemento
  * @param _padre Elemento padre
  * @param _animale animale da aggiungere (di tipo struct _animale)
@@ -60,7 +61,11 @@ int verificaSpecie(direct_graph specieAnimali, node_id _specie, node_id _famigli
  * Aggiunge una nuova area dello zoo.
  * L'area è di tipo struct _area. Crea una nuova area, e la inizializza con i valori passati come parametri.
  * Dato che l'area è nuova e appena aggiunta, currentAnimalNumber sarà 0.
- *
+ * @param _manager Manager su cui operare.
+ * @param codice Codice identificativo dell'area.
+ * @param nome Nome dell'area.
+ * @param tipologia Tipologia di area.
+ * @param maxCapacity Capienza massima dell'area.
  * @return ZOO_SUCCESS se l'operazione riesce,
  *         ZOO_ERROR_AREA se il codice dell'area è già esistente,
  *         ZOO_ERROR_CAPACITY se la capacità non è valida. (Creare parametri per la capacità non valida. EX: if capacity <= 0...)
@@ -69,8 +74,29 @@ int aggiungiArea(zooManager _manager, char* codice, char* nome, char* tipologia,
 
 
 /* F4
- *
+ * Aggiunge un nuovo animale alla classificazione.
+ * @param _manager Manager su cui operare.
+ * @param codice Codice identificativo dell'animale.
+ * @param nome Nome dell'animale.
+ * @param specie Specie dell'animale.
+ * @param eta Eta dell'animale.
+ * @param areaIniziale Area in cui l'animale verrà inserito inizialmente.
+ * @param statoSalute Stato di salute dell'animale.
+ * @return ZOO_SUCCESS se l'operazione di aggiunta riesce,
+ *         ZOO_ERROR_ANIMAL se l'animale è già presente,
+ *         ZOO_ERROR_NULL se _manager, codice, nome, specie, areaIniziale o salute sono NULL,
+ *         ZOO_ERROR_CAPACITY se la capienza massima dell'area viene superata.
  */
 int aggiungiAnimale(zooManager _manager, char* codice, char* nome, char* specie, int eta, char* areaIniziale, char* statoSalute);
+
+
+/* F5
+ * Registra una nuova richiesta operativa.
+ *
+ * @return ZOO_SUCCESS se l'operazione riesce,
+ *         ZOO_ERROR_ANIMAL se _animaleCoinvolto non è valido,
+ *         ZOO_ERROR_AREA se _area non è valida.
+ */
+int registraNuovaRichiesta(char* _codice, enum tipoRichiesta _tipologia, char* _animaleCoinvolto, char* _area, enum priorita _priorita);
 
 #endif

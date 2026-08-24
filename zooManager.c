@@ -71,27 +71,6 @@ struct _operazione {
 };
 
 
-/* Manage:
- * Insert a new species -> create new left and right child nodes of a parent node (a family)
- * Insert a new animal -> function that allows to fill in all the info about the animal (animal struct), and then inserts it into its family
- * New request -> Create a new request, specifying all its details, and "send it"
- * Selecting next request -> check the priority of the request and execute the ones with the higher priority first
- * Request Completion -> Execute what the request states, and then push it into the stack
- */
-
-/* Come verrebbero gestite le richieste
- * Quando viene presa in carico -> Si controlla la priorità, e a seconda della priorità viene presa in carico
- * Come viene aggiornata la situazione dello zoo -> Vengono aggiornate le informazioni relative alle aree o animali
- * annullare l'ultima operazione -> per annullare l'ultima operazione bisogna memorizzare tutte le informazioni della richiesta,
- * per poi ripristinarle (tipo richiesta, animale coinvolto, area...)
- */
-
-/* Verificare se la giraffa appartiene ai mammiferi...
- * Funzione per Tree traversal che attraversa tutto l'albero (BFS or DFS), e compara il nome dell'animale da cercare, con quello dei nodi visitati
- */
-
-
-
 /*
  * inizializza il sistema di gestione dello zoo, predisponendo le strutture necessarie
  * per memorizzare la classificazione degli animali, le aree, gli animali, le richieste operative
@@ -127,6 +106,7 @@ int verificaSpecie(direct_graph specieAnimali, node_id _specie, node_id _famigli
 }
 
 int aggiungiArea(zooManager _manager, char* codice, char* nome, char* tipologia, int maxCapacity) {
+    if (_manager == NULL) return ZOO_ERROR_NULL;
     if (codice == NULL || nome == NULL || tipologia == NULL) return ZOO_ERROR_NULL;
     if (maxCapacity < 0) return ZOO_ERROR_CAPACITY;
 
@@ -143,18 +123,34 @@ int aggiungiArea(zooManager _manager, char* codice, char* nome, char* tipologia,
     _area->maxCapacity = maxCapacity;
     _area->currentAnimalNumber = 0;
 
-    hashmap_set(_manager->aree, codice, _area);
+    // Crea la hashmap contenente tutti gli animali dell'area
+    _area->animaliPresenti = hashmap_create(20);
+    if (_area->animaliPresenti == NULL) {
+        free(_area);
+        return ZOO_ERROR_ALLOC;
+    }
 
     return ZOO_SUCCESS;
 }
 
-// ##### CHECK IF THIS FUNCTION WORKS ########
+
 int aggiungiAnimale(zooManager _manager, char* codice, char* nome, char* specie, int eta, char* areaIniziale, char* statoSalute) {
+    if (_manager == NULL) return ZOO_ERROR_NULL;
     if (codice == NULL || nome == NULL || specie == NULL || areaIniziale == NULL || statoSalute == NULL) return ZOO_ERROR_NULL;
 
     // Controlla se l'animale è già presente
     // Cerca l'animale nella hashmap "animali" dello zooManager
     if (hashmap_has_key(_manager->animali, codice)) return ZOO_ERROR_ANIMAL;
+
+
+    // area in cui inserire il nuovo animale
+    area _area;
+
+    // Cerca l'area. Se l'area non c'è, restituisce l'errore
+    if (hashmap_get(_manager->aree, areaIniziale, (void**)&_area) != 0) return ZOO_ERROR_AREA;
+
+    // Controlla la capienza dell'area
+    if (_area->currentAnimalNumber >= _area->maxCapacity) return ZOO_ERROR_CAPACITY;
 
     animale nuovoAnimale = malloc(sizeof(struct _animale));
     if (nuovoAnimale == NULL) return ZOO_ERROR_ALLOC;
@@ -162,23 +158,31 @@ int aggiungiAnimale(zooManager _manager, char* codice, char* nome, char* specie,
     strcpy(nuovoAnimale->codice, codice);
     strcpy(nuovoAnimale->nome, nome);
     strcpy(nuovoAnimale->specie, specie);
-    nuovoAnimale->eta = eta;
 
-    // Se l'area in cui inserire l'animale è già presente, inserisce l'animale in quell'area
-    // Cerca il nome dell'area del nuovoAnimale, nella hashmap "aree" dello zooManager
-    if (hashmap_has_key(_manager->aree, nuovoAnimale->area->nome)) {
-        // Se la maxCapacity dell'area è stata raggiunta, non permette l'inserimento di un nuovo animale
-        if (nuovoAnimale->area->maxCapacity >= nuovoAnimale->area->maxCapacity) {
-            printf("\nCapacità dell'area raggiunta!\n");
-            return ZOO_ERROR_CAPACITY;
-        }
-        // Altrimenti inserisce il nuovo animale nella hashmap animaliPresenti della rispettiva area
-        hashmap_set(nuovoAnimale->area->animaliPresenti, nuovoAnimale->codice, nuovoAnimale->nome);
+    nuovoAnimale->eta = eta;
+    nuovoAnimale->area = _area;
+
+    // Converte lo stato di salute
+    // Compara quello che scrive l'utente. Se l'utente scrive "sano", lo stato di salute sarà SANO
+    if (strcmp(statoSalute, "sano") == 0) nuovoAnimale->stato = SANO;
+    else if (strcmp(statoSalute, "sotto osservazione") == 0) nuovoAnimale->stato = OSSERVAZIONE;
+    else if (strcmp(statoSalute, "in cura") == 0) nuovoAnimale->stato = IN_CURA;
+    else if (strcmp(statoSalute, "quarantena") == 0) nuovoAnimale->stato = QUARANTENA;
+    else {
+        free(nuovoAnimale);
+        return ZOO_ERROR_NOT_FOUND;
     }
+
 
     // Aggiunge il nuovo animale alla hashmap animali dello zooManager
     // (key = codice, value = nome del nuovo animale)
-    hashmap_set(_manager->animali, codice, nuovoAnimale->nome);
+    hashmap_set(_manager->animali, codice, nuovoAnimale);
+
+    // Inserisce il nuovo animale nella hashmap dell'area
+    hashmap_set(_area->animaliPresenti, codice, nuovoAnimale);
+
+    // Aumenta il numero di animali presenti nell'area
+    _area->currentAnimalNumber++;
 
     return ZOO_SUCCESS;
 }
