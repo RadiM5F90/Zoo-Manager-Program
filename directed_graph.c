@@ -3,9 +3,6 @@
 #include "list_stack.h"
 #include "list_queue.h"
 
-// ########  Turn the directed graph into a generic graph #########
-
-
 // Adjacency Matrix
 // i, j are the Matrix's cells, i * N * j calculates the equivalent index
 #define MAP(i, j, N) ((i) * (N) + (j))

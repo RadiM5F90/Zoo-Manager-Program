@@ -28,10 +28,38 @@ void print_string(void* value) {
 }
 
 int main() {
+    // New zooManager
+    zooManager _manager = zooManager_create();
+
     direct_graph grafoClassificazione = direct_graph_create(200);
 
-    // Categoria generale
     node_id classificazione = add_node(grafoClassificazione, "Classificazione");
+
+    // Add animals
+    aggiungiAnimale(_manager, "L1", "Simba", "Leone", 8, "area A2", "Sano");
+    aggiungiAnimale(_manager, "T1", "Rajah", "Tigre", 6, "area A2", "Sano");
+    aggiungiAnimale(_manager, "G1", "Galena", "Giraffa", 9, "area A1", "sotto osservazione");
+    aggiungiAnimale(_manager, "A1", "Rio", "Ara", 4, "area A3", "Sano");
+    aggiungiAnimale(_manager, "P1", "Kaa", "Pitone Reale", 10, "area A4", "in cura");
+    aggiungiAnimale(_manager, "TR1", "Shelly", "Tartaruga Gigante", 35, "area A4", "Sano");
+
+
+    aggiungiElemento(grafoClassificazione, "Classificazione", "Mammiferi");
+    aggiungiElemento(grafoClassificazione, "Classificazione", "Rettili");
+    aggiungiElemento(grafoClassificazione, "Classificazione", "Uccelli");
+
+    aggiungiElemento(grafoClassificazione, "Mammiferi", "Felidi");
+    aggiungiElemento(grafoClassificazione, "Mammiferi", "Giraffidi");
+
+    aggiungiElemento(grafoClassificazione, "Felidi", "Leone");
+    aggiungiElemento(grafoClassificazione, "Felidi", "Tigre");
+
+
+
+
+    /*
+    // Categoria generale
+
     node_id Mammiferi = add_node(grafoClassificazione, "Mammiferi");
     node_id Rettili = add_node(grafoClassificazione, "Rettili");
     node_id Uccelli = add_node(grafoClassificazione, "Uccelli");
@@ -56,47 +84,20 @@ int main() {
 
     add_edge(grafoClassificazione, Mammiferi, Giraffidi);
     add_edge(grafoClassificazione, Giraffidi, giraffa);
+*/
 
 
 
+
+/*
     printf("DFS from node n1: ");
     list _dfs = direct_graph_dfs(grafoClassificazione, classificazione);
     print_node_list(grafoClassificazione, _dfs, print_string);
     list_destroy(&_dfs);
 
-
-
-    printf("BFS from node n1: ");
-    list _bfs = direct_graph_bfs(grafoClassificazione, classificazione);
-    print_node_list(grafoClassificazione, _bfs, print_string);
-    list_destroy(&_bfs);
-
-
-/*
-    // Animals hashmap test
-    hashmap hashAnimals = hashmap_create(10);
-
-    hashmap_set(hashAnimals, "L1", 0);
-    hashmap_set(hashAnimals, "T1", 1);
-    hashmap_set(hashAnimals, "G1", 2);
-    hashmap_set(hashAnimals, "A1", 3);
-    hashmap_set(hashAnimals, "P1", 4);
-    hashmap_set(hashAnimals, "TR1", 5);
-
-    int value;
-
-    // If... successful, then print...
-    if (hashmap_get(hashAnimals, "L1", &value) == 0) printf("L1 -> %d, name -> %s\n", value, animal_name[value]);
-    if (hashmap_get(hashAnimals, "T1", &value) == 0) printf("T1 -> %d, name -> %s\n", value, animal_name[value]);
-    if (hashmap_get(hashAnimals, "G1", &value) == 0) printf("G1 -> %d, name -> %s\n", value, animal_name[value]);
-    if (hashmap_get(hashAnimals, "A1", &value) == 0) printf("A1 -> %d, name -> %s\n", value, animal_name[value]);
-    if (hashmap_get(hashAnimals, "P1", &value) == 0) printf("P1 -> %d, name -> %s\n", value, animal_name[value]);
-    if (hashmap_get(hashAnimals, "TR1", &value) == 0) printf("TR1 -> %d, name -> %s\n", value, animal_name[value]);
-
-
-    // Areas hashmap test
-
+    // Verifica se il leone appartiene ai mammiferi usando direct_graph_path_exists
+    printf("\nPath from Mammiferi to leone: %s\n",
+        direct_graph_path_exists(grafoClassificazione, Mammiferi, leone) ? "Exists" : "Does not exist");
 */
-
     return 0;
 }

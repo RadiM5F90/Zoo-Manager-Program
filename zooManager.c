@@ -11,7 +11,8 @@ typedef enum {VISITA_VETERINARIA, ALIMENTAZIONE, TRASFERIMENTO_ANIMALE, MANUTENZ
 typedef enum {ALTA, MEDIA, BASSA} priorita;
 
 // Helper private function to find an element in the graph
-int findElement(direct_graph _graph, node_id _element);
+node_id find_node_by_value(direct_graph _specieAnimali, char* _value);
+
 
 
 struct _zooManager {
@@ -92,35 +93,59 @@ zooManager zooManager_create() {
     return manager;
 }
 
-int aggiungiElemento(direct_graph specieAnimali, node_id _padre, node_id _animale) {
-    // To add a new element, take a graph and add a new node
-    // take the _padre, create a new node, and add an edge between _padre and _animale
-    // Use the BFS/DFS to find _padre, if not found return error, else add a new node and an edge
+// #### CHANGE from direct_graph to zooManager ######
+int aggiungiElemento(direct_graph _specieAnimali, char* _padre, char* _elemento) {
+    if (_specieAnimali == NULL || _padre == NULL || _elemento == NULL) return ZOO_ERROR_NULL;
 
+    // check if _padre exists
+    node_id padre = find_node_by_value(_specieAnimali, _padre);
+    if (padre < 0) return ZOO_ERROR_NULL;
+
+    // Check if _elemento exists
+    node_id checkElemento = find_node_by_value(_specieAnimali, _elemento);
+    if (checkElemento >= 0) return ZOO_ERROR_NULL;
+
+    // Create the new node
+    node_id nuovoElemento = add_node(_specieAnimali, _elemento);
+    if (nuovoElemento < 0) return ZOO_ERROR_NULL;
+
+    // Adding an edge between the 2 nodes
+    if (add_edge(_specieAnimali, padre, nuovoElemento) != DIRECT_GRAPH_SUCCESS) return ZOO_ERROR_NOT_FOUND;
 
     return ZOO_SUCCESS;
 }
 
-int verificaSpecie(direct_graph specieAnimali, node_id _specie, node_id _famiglia) {
-    return ZOO_SUCCESS;
+int verificaSpecie(direct_graph _specieAnimali, char* _specie, char* _famiglia) {
+    if (_specieAnimali == NULL || _specie == NULL || _famiglia == NULL) return ZOO_ERROR_NULL;
+
+    // Check if _specie exists
+    node_id specie = find_node_by_value(_specieAnimali, _specie);
+    if (specie < 0) return ZOO_ERROR_NULL;
+
+    // Check if _famiglia exists
+    node_id famiglia = find_node_by_value(_specieAnimali, _famiglia);
+    if (famiglia < 0) return ZOO_ERROR_NULL;
+
+    // Check if the path between those 2 nodes exists
+    return direct_graph_path_exists(_specieAnimali, famiglia, specie);
 }
 
-int aggiungiArea(zooManager _manager, char* codice, char* nome, char* tipologia, int maxCapacity) {
+int aggiungiArea(zooManager _manager, char* _codice, char* _nome, char* _tipologia, int _maxCapacity) {
     if (_manager == NULL) return ZOO_ERROR_NULL;
-    if (codice == NULL || nome == NULL || tipologia == NULL) return ZOO_ERROR_NULL;
-    if (maxCapacity < 0) return ZOO_ERROR_CAPACITY;
+    if (_codice == NULL || _nome == NULL || _tipologia == NULL) return ZOO_ERROR_NULL;
+    if (_maxCapacity < 0) return ZOO_ERROR_CAPACITY;
 
     // Controlla se l'area esiste già
-    if (hashmap_has_key(_manager->aree, codice)) return ZOO_ERROR_AREA;
+    if (hashmap_has_key(_manager->aree, _codice)) return ZOO_ERROR_AREA;
 
     area _area = malloc(sizeof(struct _area));
     if (_area == NULL) return ZOO_ERROR_ALLOC;
 
-    strcpy(_area->codice, codice);
-    strcpy(_area->nome, nome);
-    strcpy(_area->tipologia, tipologia);
+    strcpy(_area->codice, _codice);
+    strcpy(_area->nome, _nome);
+    strcpy(_area->tipologia, _tipologia);
 
-    _area->maxCapacity = maxCapacity;
+    _area->maxCapacity = _maxCapacity;
     _area->currentAnimalNumber = 0;
 
     // Crea la hashmap contenente tutti gli animali dell'area
@@ -134,20 +159,20 @@ int aggiungiArea(zooManager _manager, char* codice, char* nome, char* tipologia,
 }
 
 
-int aggiungiAnimale(zooManager _manager, char* codice, char* nome, char* specie, int eta, char* areaIniziale, char* statoSalute) {
+int aggiungiAnimale(zooManager _manager, char* _codice, char* _nome, char* _specie, int _eta, char* _areaIniziale, char* _statoSalute) {
     if (_manager == NULL) return ZOO_ERROR_NULL;
-    if (codice == NULL || nome == NULL || specie == NULL || areaIniziale == NULL || statoSalute == NULL) return ZOO_ERROR_NULL;
+    if (_codice == NULL || _nome == NULL || _specie == NULL || _areaIniziale == NULL || _statoSalute == NULL) return ZOO_ERROR_NULL;
 
     // Controlla se l'animale è già presente
     // Cerca l'animale nella hashmap "animali" dello zooManager
-    if (hashmap_has_key(_manager->animali, codice)) return ZOO_ERROR_ANIMAL;
+    if (hashmap_has_key(_manager->animali, _codice)) return ZOO_ERROR_ANIMAL;
 
 
     // area in cui inserire il nuovo animale
     area _area;
 
     // Cerca l'area. Se l'area non c'è, restituisce l'errore
-    if (hashmap_get(_manager->aree, areaIniziale, (void**)&_area) != 0) return ZOO_ERROR_AREA;
+    if (hashmap_get(_manager->aree, _areaIniziale, (void**)&_area) != 0) return ZOO_ERROR_AREA;
 
     // Controlla la capienza dell'area
     if (_area->currentAnimalNumber >= _area->maxCapacity) return ZOO_ERROR_CAPACITY;
@@ -155,19 +180,19 @@ int aggiungiAnimale(zooManager _manager, char* codice, char* nome, char* specie,
     animale nuovoAnimale = malloc(sizeof(struct _animale));
     if (nuovoAnimale == NULL) return ZOO_ERROR_ALLOC;
 
-    strcpy(nuovoAnimale->codice, codice);
-    strcpy(nuovoAnimale->nome, nome);
-    strcpy(nuovoAnimale->specie, specie);
+    strcpy(nuovoAnimale->codice, _codice);
+    strcpy(nuovoAnimale->nome, _nome);
+    strcpy(nuovoAnimale->specie, _specie);
 
-    nuovoAnimale->eta = eta;
+    nuovoAnimale->eta = _eta;
     nuovoAnimale->area = _area;
 
     // Converte lo stato di salute
     // Compara quello che scrive l'utente. Se l'utente scrive "sano", lo stato di salute sarà SANO
-    if (strcmp(statoSalute, "sano") == 0) nuovoAnimale->stato = SANO;
-    else if (strcmp(statoSalute, "sotto osservazione") == 0) nuovoAnimale->stato = OSSERVAZIONE;
-    else if (strcmp(statoSalute, "in cura") == 0) nuovoAnimale->stato = IN_CURA;
-    else if (strcmp(statoSalute, "quarantena") == 0) nuovoAnimale->stato = QUARANTENA;
+    if (strcmp(_statoSalute, "sano") == 0) nuovoAnimale->stato = SANO;
+    else if (strcmp(_statoSalute, "sotto osservazione") == 0) nuovoAnimale->stato = OSSERVAZIONE;
+    else if (strcmp(_statoSalute, "in cura") == 0) nuovoAnimale->stato = IN_CURA;
+    else if (strcmp(_statoSalute, "quarantena") == 0) nuovoAnimale->stato = QUARANTENA;
     else {
         free(nuovoAnimale);
         return ZOO_ERROR_NOT_FOUND;
@@ -176,10 +201,10 @@ int aggiungiAnimale(zooManager _manager, char* codice, char* nome, char* specie,
 
     // Aggiunge il nuovo animale alla hashmap animali dello zooManager
     // (key = codice, value = nome del nuovo animale)
-    hashmap_set(_manager->animali, codice, nuovoAnimale);
+    hashmap_set(_manager->animali, _codice, nuovoAnimale);
 
     // Inserisce il nuovo animale nella hashmap dell'area
-    hashmap_set(_area->animaliPresenti, codice, nuovoAnimale);
+    hashmap_set(_area->animaliPresenti, _codice, nuovoAnimale);
 
     // Aumenta il numero di animali presenti nell'area
     _area->currentAnimalNumber++;
@@ -187,9 +212,15 @@ int aggiungiAnimale(zooManager _manager, char* codice, char* nome, char* specie,
     return ZOO_SUCCESS;
 }
 
-// Helper function to find an element in the graph
-int findElement(direct_graph _graph, node_id _element) {
-    if (_graph == NULL) return ZOO_ERROR_NULL;
 
+node_id find_node_by_value(direct_graph _specieAnimali, char* _value) {
+    if (_specieAnimali == NULL || _value == NULL) return DIRECT_GRAPH_ERROR_NULL;
 
+    for (node_id i = 0; i < direct_graph_size(_specieAnimali); i++) {
+        void* value;
+        if (get_value(_specieAnimali, i, &value) == DIRECT_GRAPH_SUCCESS) {
+            if (strcmp((char*)value, _value) == 0) return i;
+        }
+    }
+    return DIRECT_GRAPH_ERROR_INVALID_ID;
 }
