@@ -51,38 +51,6 @@ int main() {
     aggiungiElemento(_manager, "Felidi", "Tigre");
 
 
-
-
-    /*
-    // Categoria generale
-
-    node_id Mammiferi = add_node(grafoClassificazione, "Mammiferi");
-    node_id Rettili = add_node(grafoClassificazione, "Rettili");
-    node_id Uccelli = add_node(grafoClassificazione, "Uccelli");
-
-    add_edge(grafoClassificazione, classificazione, Mammiferi);
-    add_edge(grafoClassificazione, classificazione, Rettili);
-    add_edge(grafoClassificazione, classificazione, Uccelli);
-
-
-    // Felidi
-    node_id Felidi = add_node(grafoClassificazione, "Felidi");
-    node_id leone = add_node(grafoClassificazione, "leone");
-    node_id tigre = add_node(grafoClassificazione, "tigre");
-
-    add_edge(grafoClassificazione, Mammiferi, Felidi);
-    add_edge(grafoClassificazione, Felidi, leone);
-    add_edge(grafoClassificazione, Felidi, tigre);
-
-    // Giraffidi
-    node_id Giraffidi = add_node(grafoClassificazione, "Giraffidi");
-    node_id giraffa = add_node(grafoClassificazione, "giraffa");
-
-    add_edge(grafoClassificazione, Mammiferi, Giraffidi);
-    add_edge(grafoClassificazione, Giraffidi, giraffa);
-*/
-
-
 /*
     printf("DFS from root node: ");
     list _dfs = direct_graph_dfs(grafoClassificazione, classificazione);

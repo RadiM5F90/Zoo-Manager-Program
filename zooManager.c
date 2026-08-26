@@ -9,10 +9,10 @@
 typedef enum {SANO, OSSERVAZIONE, IN_CURA, QUARANTENA} statoSalute;
 typedef enum {VISITA_VETERINARIA, ALIMENTAZIONE, TRASFERIMENTO_ANIMALE, MANUTENZIONE_RECINTO, ASSISTENZA_VISITATORI} tipoRichiesta;
 typedef enum {ALTA, MEDIA, BASSA} priorita;
+typedef enum {IN_ATTESA, IN_CARICO, COMPLETATA} statoRichiesta;
 
 // Helper private function to find an element in the graph
 node_id find_node_by_value(direct_graph _specieAnimali, char* _value);
-
 
 
 struct _zooManager {
@@ -20,11 +20,12 @@ struct _zooManager {
     hashmap aree;
     hashmap animali;
 
-    stack richiesteEffettuate;     // Stack in cui inserire le richieste effettuate
-
     queue alta;                    // Richieste con priorità alta
     queue media;                   // Priorità media
     queue bassa;                   // Priorità bassa
+
+    stack richiesteEffettuate;     // Stack in cui inserire le richieste effettuate
+    queue richiesteInCarico;       // Queue in cui inserire le richieste prese in carico (da effettuare)
 };
 
 struct _animale {
@@ -40,6 +41,7 @@ struct _animale {
 struct _richiesta {
     char codice[20];                   // Codice della richiesta
     tipoRichiesta tipologia;           // tipologia di richiesta (enum)
+    statoRichiesta stato;
 
     animale animaleCoinvolto;
     area areaInteressata;
@@ -82,11 +84,12 @@ zooManager zooManager_create() {
 
     manager->aree = hashmap_create(100);
 
-    manager->richiesteEffettuate = create_stack(100);
-
     manager->alta = create_queue(100);
     manager->media = create_queue(100);
     manager->bassa = create_queue(100);
+
+    manager->richiesteEffettuate = create_stack(100);
+    manager->richiesteInCarico = create_queue(100);
 
     return manager;
 }
@@ -280,9 +283,34 @@ int registraNuovaRichiesta(zooManager _manager, char* _codice, char* _tipologia,
         free(nuovaRichiesta);
         return ZOO_ERROR_NOT_FOUND;
     }
+
+    // Dato che la richiesta è stata appena creata, il suo stato sarà IN_ATTESA
+    nuovaRichiesta->stato = IN_ATTESA;
+
     return ZOO_SUCCESS;
 }
 
+int gestisciRichiesta(zooManager _manager, richiesta* _richiesta_out) {
+    if (_manager == NULL) return ZOO_ERROR_NULL;
+    if (_richiesta_out == NULL) return ZOO_ERROR_NULL;
+
+    richiesta _r = NULL;
+
+    // Cerca le richieste da eseguire
+    if (!queue_is_empty(_manager->alta)) dequeue(_manager->alta, (void**)&_r);
+    else if (!queue_is_empty(_manager->media)) dequeue(_manager->media, (void**)&_r);
+    else if (!queue_is_empty(_manager->bassa)) dequeue(_manager->bassa, (void**)&_r);
+    else return ZOO_ERROR_NOT_FOUND;
+
+    // Aggiorna lo stato della richiesta
+    _r->stato = IN_CARICO;
+
+    enqueue(_manager->richiesteInCarico, _r);
+
+    *_richiesta_out = _r;
+
+    return ZOO_SUCCESS;
+}
 
 // Private function to find a node by value
 node_id find_node_by_value(direct_graph _specieAnimali, char* _value) {

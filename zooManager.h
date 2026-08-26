@@ -105,4 +105,16 @@ int aggiungiAnimale(zooManager _manager, char* _codice, char* _nome, char* _spec
  */
 int registraNuovaRichiesta(zooManager _manager, char* _codice, char* _tipologia, char* _animaleCoinvolto, char* _area, char* _priorita, char* _descrizione);
 
+
+/* F6
+ * @param _manager Manager su cui operare.
+ * @param _richiesta_out Puntatore su cui scrivere la richiesta selezionata dalla funzione
+ * @return ZOO_SUCCESS se l'operazione riesce,
+ *         ZOO_ERROR_NULL se _manager o _richiesta_out è NULL,
+ *         ZOO_ERROR_NOT_FOUND se non ci sono altre richieste da eseguire e selezionare
+ */
+int gestisciRichiesta(zooManager _manager, richiesta* _richiesta_out);
+
+
+
 #endif
