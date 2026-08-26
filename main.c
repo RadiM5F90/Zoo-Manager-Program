@@ -31,10 +31,6 @@ int main() {
     // New zooManager
     zooManager _manager = zooManager_create();
 
-    direct_graph grafoClassificazione = direct_graph_create(200);
-
-    node_id classificazione = add_node(grafoClassificazione, "Classificazione");
-
     // Add animals
     aggiungiAnimale(_manager, "L1", "Simba", "Leone", 8, "area A2", "Sano");
     aggiungiAnimale(_manager, "T1", "Rajah", "Tigre", 6, "area A2", "Sano");
@@ -44,15 +40,15 @@ int main() {
     aggiungiAnimale(_manager, "TR1", "Shelly", "Tartaruga Gigante", 35, "area A4", "Sano");
 
 
-    aggiungiElemento(grafoClassificazione, "Classificazione", "Mammiferi");
-    aggiungiElemento(grafoClassificazione, "Classificazione", "Rettili");
-    aggiungiElemento(grafoClassificazione, "Classificazione", "Uccelli");
+    aggiungiElemento(_manager, "Classificazione", "Mammiferi");
+    aggiungiElemento(_manager, "Classificazione", "Rettili");
+    aggiungiElemento(_manager, "Classificazione", "Uccelli");
 
-    aggiungiElemento(grafoClassificazione, "Mammiferi", "Felidi");
-    aggiungiElemento(grafoClassificazione, "Mammiferi", "Giraffidi");
+    aggiungiElemento(_manager, "Mammiferi", "Felidi");
+    aggiungiElemento(_manager, "Mammiferi", "Giraffidi");
 
-    aggiungiElemento(grafoClassificazione, "Felidi", "Leone");
-    aggiungiElemento(grafoClassificazione, "Felidi", "Tigre");
+    aggiungiElemento(_manager, "Felidi", "Leone");
+    aggiungiElemento(_manager, "Felidi", "Tigre");
 
 
 
@@ -87,17 +83,12 @@ int main() {
 */
 
 
-
-
 /*
-    printf("DFS from node n1: ");
+    printf("DFS from root node: ");
     list _dfs = direct_graph_dfs(grafoClassificazione, classificazione);
     print_node_list(grafoClassificazione, _dfs, print_string);
     list_destroy(&_dfs);
-
-    // Verifica se il leone appartiene ai mammiferi usando direct_graph_path_exists
-    printf("\nPath from Mammiferi to leone: %s\n",
-        direct_graph_path_exists(grafoClassificazione, Mammiferi, leone) ? "Exists" : "Does not exist");
 */
+
     return 0;
 }

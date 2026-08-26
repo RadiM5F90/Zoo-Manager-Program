@@ -9,15 +9,16 @@
 
 
 // Return codes
-#define ZOO_SUCCESS 0;
-#define ZOO_ERROR_NULL -1;
-#define ZOO_ERROR_NOT_FOUND -2;
-#define ZOO_ERROR_FAMILY -3;
-#define ZOO_ERROR_CATEGORY -4;
-#define ZOO_ERROR_ANIMAL -5;
-#define ZOO_ERROR_ALLOC -6;
-#define ZOO_ERROR_AREA -7;
-#define ZOO_ERROR_CAPACITY -8;
+#define ZOO_SUCCESS 0
+#define ZOO_ERROR_NULL -1
+#define ZOO_ERROR_NOT_FOUND -2
+#define ZOO_ERROR_FAMILY -3
+#define ZOO_ERROR_CATEGORY -4
+#define ZOO_ERROR_ANIMAL -5
+#define ZOO_ERROR_ALLOC -6
+#define ZOO_ERROR_AREA -7
+#define ZOO_ERROR_CAPACITY -8
+#define ZOO_ERROR_ALREADY_EXISTS -9
 
 
 typedef struct _zooManager* zooManager;
@@ -37,25 +38,25 @@ zooManager zooManager_create();
 /* F1
  * Aggiunge un nuovo elemento alla classificazione degli animali
  * Prende l'animale/categoria già creati e lo aggiunge alla classificazione
- * @param _specieAnimali Grafo in cui inserire il nuovo elemento
+ * @param _manager Manager su cui operare
  * @param _padre Elemento padre
  * @param _elemento Elemento da aggiungere
  * @return ZOO_SUCCESS se l'operazione riesce,
  *         ZOO_ERROR_NOT_FOUND se _padre non esiste,
  *         ZOO_ERROR_NULL se _animale è già presente.
  */
-int aggiungiElemento(direct_graph _specieAnimali, char* _padre, char* _elemento);
+int aggiungiElemento(zooManager _manager, char* _padre, char* _elemento);
 
 /* F2
  * Verifica se una specie appartiene a una determinata famiglia o categoria.
- * @param _specieAnimali Grafo su cui operare.
+ * @param _manager Manager dello zoo su cui operare
  * @param _specie Specie da controllare.
  * @param _famiglia Famiglia o categoria da controllare.
  * @return ZOO_SUCCESS se l'operazione riesce,
  *         ZOO_ERROR_FAMILY se _famiglia non esiste,
  *         ZOO_ERROR_ANIMAL se _specie non esiste.
  */
-int verificaSpecie(direct_graph _specieAnimali, char* _specie, char* _famiglia);
+int verificaSpecie(zooManager _manager, char* _specie, char* _famiglia);
 
 /* F3
  * Aggiunge una nuova area dello zoo.
@@ -90,11 +91,18 @@ int aggiungiAnimale(zooManager _manager, char* _codice, char* _nome, char* _spec
 
 /* F5
  * Registra una nuova richiesta operativa.
- *
+ * @param _manager Zoo Manager su cui operare.
+ * @param _codice Codice della richiesta.
+ * @param _tipologia Tipo di richiesta da effettuare.
+ * @param _animaleCoinvolto Animale su cui effettuare la richiesta.
+ * @param _area Area coinvolta.
+ * @param _priorita Priorità della richiesta.
+ * @param _descrizione Descrizione aggiuntiva sulla richiesta da effettuare.
  * @return ZOO_SUCCESS se l'operazione riesce,
  *         ZOO_ERROR_ANIMAL se _animaleCoinvolto non è valido,
- *         ZOO_ERROR_AREA se _area non è valida.
+ *         ZOO_ERROR_AREA se _area non è valida,
+ *         ZOO_ERROR_NULL se _manager è NULL.
  */
-int registraNuovaRichiesta(char* _codice, enum tipoRichiesta _tipologia, char* _animaleCoinvolto, char* _area, enum priorita _priorita);
+int registraNuovaRichiesta(zooManager _manager, char* _codice, char* _tipologia, char* _animaleCoinvolto, char* _area, char* _priorita, char* _descrizione);
 
 #endif

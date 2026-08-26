@@ -16,7 +16,7 @@ node_id find_node_by_value(direct_graph _specieAnimali, char* _value);
 
 
 struct _zooManager {
-    direct_graph classificazione;          // Grafo diretto che organizza gerarchicamente gli animali, le specie, famiglie...
+    direct_graph classificazione;  // Grafo diretto che organizza gerarchicamente gli animali, le specie, famiglie...
     hashmap aree;
     hashmap animali;
 
@@ -55,7 +55,6 @@ struct _area {
     int maxCapacity;            // Capacità massima dell'area
     int currentAnimalNumber;    // Num corrente di animali ospitati
 
-    // Nuova aggiunta: hashmap contenete gli animali presenti nell'area
     hashmap animaliPresenti;
 };
 
@@ -72,16 +71,15 @@ struct _operazione {
 };
 
 
-/*
- * inizializza il sistema di gestione dello zoo, predisponendo le strutture necessarie
- * per memorizzare la classificazione degli animali, le aree, gli animali, le richieste operative
- * e le operazioni effettuate.
- */
 zooManager zooManager_create() {
     zooManager manager = malloc(sizeof(struct _zooManager));
     if (manager == NULL) return NULL;
 
     manager->classificazione = direct_graph_create(100);
+
+    // Creates the root node
+    add_node(manager->classificazione, strdup("Classificazione"));
+
     manager->aree = hashmap_create(100);
 
     manager->richiesteEffettuate = create_stack(100);
@@ -93,41 +91,42 @@ zooManager zooManager_create() {
     return manager;
 }
 
-// #### CHANGE from direct_graph to zooManager ######
-int aggiungiElemento(direct_graph _specieAnimali, char* _padre, char* _elemento) {
-    if (_specieAnimali == NULL || _padre == NULL || _elemento == NULL) return ZOO_ERROR_NULL;
+int aggiungiElemento(zooManager _manager, char* _padre, char* _elemento) {
+    if (_manager == NULL) return ZOO_ERROR_NULL;
+    if (_padre == NULL || _elemento == NULL) return ZOO_ERROR_NULL;
 
     // check if _padre exists
-    node_id padre = find_node_by_value(_specieAnimali, _padre);
-    if (padre < 0) return ZOO_ERROR_NULL;
+    node_id padre = find_node_by_value(_manager->classificazione, _padre);
+    if (padre < 0) return ZOO_ERROR_NOT_FOUND;
 
     // Check if _elemento exists
-    node_id checkElemento = find_node_by_value(_specieAnimali, _elemento);
-    if (checkElemento >= 0) return ZOO_ERROR_NULL;
+    node_id checkElemento = find_node_by_value(_manager->classificazione, _elemento);
+    if (checkElemento >= 0) return ZOO_ERROR_ALREADY_EXISTS;
 
     // Create the new node
-    node_id nuovoElemento = add_node(_specieAnimali, _elemento);
+    node_id nuovoElemento = add_node(_manager->classificazione, _elemento);
     if (nuovoElemento < 0) return ZOO_ERROR_NULL;
 
     // Adding an edge between the 2 nodes
-    if (add_edge(_specieAnimali, padre, nuovoElemento) != DIRECT_GRAPH_SUCCESS) return ZOO_ERROR_NOT_FOUND;
+    if (add_edge(_manager->classificazione, padre, nuovoElemento) != DIRECT_GRAPH_SUCCESS) return ZOO_ERROR_NOT_FOUND;
 
     return ZOO_SUCCESS;
 }
 
-int verificaSpecie(direct_graph _specieAnimali, char* _specie, char* _famiglia) {
-    if (_specieAnimali == NULL || _specie == NULL || _famiglia == NULL) return ZOO_ERROR_NULL;
+int verificaSpecie(zooManager _manager, char* _specie, char* _famiglia) {
+    if (_manager == NULL) return ZOO_ERROR_NULL;
+    if (_specie == NULL || _famiglia == NULL) return ZOO_ERROR_NULL;
 
     // Check if _specie exists
-    node_id specie = find_node_by_value(_specieAnimali, _specie);
-    if (specie < 0) return ZOO_ERROR_NULL;
+    node_id specie = find_node_by_value(_manager->classificazione, _specie);
+    if (specie < 0) return ZOO_ERROR_NOT_FOUND;
 
     // Check if _famiglia exists
-    node_id famiglia = find_node_by_value(_specieAnimali, _famiglia);
-    if (famiglia < 0) return ZOO_ERROR_NULL;
+    node_id famiglia = find_node_by_value(_manager->classificazione, _famiglia);
+    if (famiglia < 0) return ZOO_ERROR_NOT_FOUND;
 
     // Check if the path between those 2 nodes exists
-    return direct_graph_path_exists(_specieAnimali, famiglia, specie);
+    return direct_graph_path_exists(_manager->classificazione, famiglia, specie);
 }
 
 int aggiungiArea(zooManager _manager, char* _codice, char* _nome, char* _tipologia, int _maxCapacity) {
@@ -147,6 +146,9 @@ int aggiungiArea(zooManager _manager, char* _codice, char* _nome, char* _tipolog
 
     _area->maxCapacity = _maxCapacity;
     _area->currentAnimalNumber = 0;
+
+    // Add the area to the manager's hashmap
+    hashmap_set(_manager->aree, _codice, _area);
 
     // Crea la hashmap contenente tutti gli animali dell'area
     _area->animaliPresenti = hashmap_create(20);
@@ -213,6 +215,76 @@ int aggiungiAnimale(zooManager _manager, char* _codice, char* _nome, char* _spec
 }
 
 
+int registraNuovaRichiesta(zooManager _manager, char* _codice, char* _tipologia, char* _animaleCoinvolto, char* _area, char* _priorita, char* _descrizione) {
+    if (_manager == NULL) return ZOO_ERROR_NULL;
+    if (_codice == NULL || _tipologia == NULL || _area == NULL || _priorita == NULL || _descrizione == NULL) return ZOO_ERROR_NULL;
+
+
+    area _areaCoinvolta;
+    animale _animale = NULL;
+
+    // Check if _area exists
+    if (hashmap_get(_manager->aree, _area, (void**)&_areaCoinvolta) != 0) return ZOO_ERROR_AREA;
+
+    // _animaleCoinvolto could also be NULL, this checks if it exists
+    if (_animaleCoinvolto != NULL) {
+        // Check if _animaleCoinvolto exists
+        if (hashmap_get(_manager->animali, _animaleCoinvolto, (void**)&_animale) != 0) return ZOO_ERROR_ANIMAL;
+    }
+
+    // Allocate memory fo the new request
+    richiesta nuovaRichiesta = malloc(sizeof(struct _richiesta));
+    if (nuovaRichiesta == NULL) return ZOO_ERROR_ALLOC;
+
+    // Fill up its values
+    strcpy(nuovaRichiesta->codice, _codice);
+    strcpy(nuovaRichiesta->descrizione, _descrizione);
+    nuovaRichiesta->areaInteressata = _areaCoinvolta;
+    nuovaRichiesta->animaleCoinvolto = _animale;
+
+
+    // Convert the enum for the tipoRichiesta
+    if (strcmp(_tipologia, "visita veterinaria") == 0) nuovaRichiesta->tipologia = VISITA_VETERINARIA;
+    else if (strcmp(_tipologia, "alimentazione") == 0) nuovaRichiesta->tipologia = ALIMENTAZIONE;
+    else if (strcmp(_tipologia, "trasferimento animale") == 0) nuovaRichiesta->tipologia = TRASFERIMENTO_ANIMALE;
+    else if (strcmp(_tipologia, "manutenzione recinto") == 0) nuovaRichiesta->tipologia = MANUTENZIONE_RECINTO;
+    else if (strcmp(_tipologia, "assistenza visitatori") == 0) nuovaRichiesta->tipologia = ASSISTENZA_VISITATORI;
+    else {
+        free(nuovaRichiesta);
+        return ZOO_ERROR_NOT_FOUND;
+    }
+
+    // Convert from the enum for the priority and inserting the request into its queue
+    if (strcmp(_priorita, "alta") == 0) {
+        nuovaRichiesta->priorita = ALTA;
+        if (enqueue(_manager->alta, nuovaRichiesta) != 0) {
+            free(nuovaRichiesta);
+            return ZOO_ERROR_ALLOC;
+        }
+    }
+    else if (strcmp(_priorita, "media") == 0) {
+        nuovaRichiesta->priorita = MEDIA;
+        if (enqueue(_manager->media, nuovaRichiesta) != 0) {
+            free(nuovaRichiesta);
+            return ZOO_ERROR_ALLOC;
+        }
+    }
+    else if (strcmp(_priorita, "bassa") == 0) {
+        nuovaRichiesta->priorita = BASSA;
+        if (enqueue(_manager->bassa, nuovaRichiesta) != 0) {
+            free(nuovaRichiesta);
+            return ZOO_ERROR_ALLOC;
+        }
+    }
+    else {
+        free(nuovaRichiesta);
+        return ZOO_ERROR_NOT_FOUND;
+    }
+    return ZOO_SUCCESS;
+}
+
+
+// Private function to find a node by value
 node_id find_node_by_value(direct_graph _specieAnimali, char* _value) {
     if (_specieAnimali == NULL || _value == NULL) return DIRECT_GRAPH_ERROR_NULL;
 
