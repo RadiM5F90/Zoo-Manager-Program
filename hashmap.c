@@ -147,6 +147,34 @@ list hashmap_get_keys(hashmap _map) {
     return keys;
 }
 
+// Function made specifically to remove an animal from the hashmaps in the zoo manager
+// It removes the key-value pair from the map, but does not completely delete it
+int hashmap_remove(hashmap _map, char* _key) {
+    if (_map == NULL) return HASHMAP_ERROR_NULL;
+    if (_key == NULL) return HASHMAP_ERROR_KEY;
+
+    int index = hash(_key, _map->capacity);
+    list _list = _map->buckets[index];
+
+    iterator _it = list_iterator_create(_list);
+    entity e = NULL;
+
+    while (iterator_has_next(_it)) {
+        e = (entity)iterator_next(_it);
+        if (strcmp(e->key, _key) == 0) {
+            list_remove_value(_list, e);
+
+            free(e->key);
+            free(e);
+
+            iterator_destroy(&_it);
+            return HASHMAP_SUCCESS;
+        }
+    }
+    iterator_destroy(&_it);
+    return HASHMAP_ERROR_NOT_FOUND;
+}
+
 int hashmap_size(hashmap _map) {
     if (_map == NULL) return HASHMAP_ERROR_NULL;
 
@@ -171,3 +199,4 @@ int hash_sum(const char* _key, int _capacity) {
 int hash(const char* _key, int _capacity) {
     return hash_sum(_key, _capacity);
 }
+

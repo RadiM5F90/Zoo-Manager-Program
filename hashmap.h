@@ -76,4 +76,11 @@ list hashmap_get_keys(hashmap _map);
  */
 int hashmap_size(hashmap _map);
 
+/*
+ * Removes a key-value pair from the hashmap.
+ * @param _map Hashmap to operate on.
+ * @param _key Key to remove.
+ */
+int hashmap_remove(hashmap _map, char* _key);
+
 #endif //PROJECT_DEMO_HASHMAP_H
