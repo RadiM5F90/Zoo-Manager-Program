@@ -115,6 +115,13 @@ int registraNuovaRichiesta(zooManager _manager, char* _codice, char* _tipologia,
  */
 int gestisciRichiesta(zooManager _manager, richiesta* _richiesta_out);
 
-
+/* F7
+ * Completa una richiesta presa in carico, aggiornando lo stato della richiesta e lo stato dell'animale coinvolto o dell'area (se presenti).
+ * @param _manager Manager su cui operare.
+ * @param _richiesta Richiesta da completare.
+ * @return ZOO_SUCCESS se l'operazione riesce,
+ *         ZOO_ERROR_NULL se _manager o _richiesta è NULL
+ */
+int completaRichiesta(zooManager _manager, richiesta _richiesta);
 
 #endif

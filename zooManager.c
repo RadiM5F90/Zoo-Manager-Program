@@ -312,6 +312,65 @@ int gestisciRichiesta(zooManager _manager, richiesta* _richiesta_out) {
     return ZOO_SUCCESS;
 }
 
+int completaRichiesta(zooManager _manager, richiesta _richiesta) {
+    if (_manager == NULL) return ZOO_ERROR_NULL;
+    if (_richiesta == NULL) return ZOO_ERROR_NULL;
+
+    if (_richiesta->stato !=  IN_CARICO) return ZOO_ERROR_NOT_FOUND;
+
+    operazione nuovaOperazione = malloc(sizeof(struct _operazione));
+    if (nuovaOperazione == NULL) return ZOO_ERROR_ALLOC;
+
+   // Salva lo stato della richiesta prima di essere eseguita
+    nuovaOperazione->animaleCoinvolto = _richiesta->animaleCoinvolto;
+    nuovaOperazione->tipologia = _richiesta->tipologia;
+
+    switch (_richiesta->tipologia) {
+        case VISITA_VETERINARIA:
+            nuovaOperazione->statoPrecedente = _richiesta->animaleCoinvolto->stato;
+            _richiesta->animaleCoinvolto->stato = IN_CURA;
+            nuovaOperazione->statoAttuale = IN_CURA;
+
+            printf("\nVisita veterinaria per %s, ospitato nell'area %s, completata con successo!\n",
+                _richiesta->animaleCoinvolto->nome, _richiesta->animaleCoinvolto->area->nome);
+            break;
+
+        case ALIMENTAZIONE:
+            // Alimentando gli animali nell'area interessata
+            printf("Alimentazione effettuata nell'area %s\n", _richiesta->areaInteressata->nome);
+            break;
+
+        case TRASFERIMENTO_ANIMALE:
+            // Registra vecchia area e nuova area nell'operazione
+            nuovaOperazione->vecchiaArea = _richiesta->animaleCoinvolto->area;
+            nuovaOperazione->nuovaArea = _richiesta->areaInteressata;
+
+            // Aggiorna il numero di animali contenuti in vecchiaArea e nuovaArea
+            _richiesta->areaInteressata->currentAnimalNumber++;
+            nuovaOperazione->vecchiaArea->currentAnimalNumber--;
+
+            // Aggiorna la nuova area per l'animale
+            _richiesta->animaleCoinvolto->area = nuovaOperazione->nuovaArea;
+
+            printf("\nTrasferimento di %s dall'area %s all'area %s effettuato con successo!",
+                _richiesta->animaleCoinvolto->nome, nuovaOperazione->vecchiaArea->nome, _richiesta->areaInteressata->nome);
+            break;
+
+        case MANUTENZIONE_RECINTO:
+            printf("\nManutenzione recinto (Area %s) effettuata con successo\n", _richiesta->areaInteressata->nome);
+            break;
+
+        case ASSISTENZA_VISITATORI:
+            printf("\nAssistenza visitatori nell'area %s avvenuta con successo!\n", _richiesta->areaInteressata->nome);
+            break;
+    }
+
+    _richiesta->stato = COMPLETATA;
+    stack_push(_manager->richiesteEffettuate, nuovaOperazione);
+
+    return ZOO_SUCCESS;
+}
+
 // Private function to find a node by value
 node_id find_node_by_value(direct_graph _specieAnimali, char* _value) {
     if (_specieAnimali == NULL || _value == NULL) return DIRECT_GRAPH_ERROR_NULL;
