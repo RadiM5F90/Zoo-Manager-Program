@@ -340,10 +340,27 @@ int completaRichiesta(zooManager _manager, richiesta _richiesta) {
             printf("Alimentazione effettuata nell'area %s\n", _richiesta->areaInteressata->nome);
             break;
 
+
         case TRASFERIMENTO_ANIMALE:
             // Registra vecchia area e nuova area nell'operazione
             nuovaOperazione->vecchiaArea = _richiesta->animaleCoinvolto->area;
             nuovaOperazione->nuovaArea = _richiesta->areaInteressata;
+
+            // Prima di inserire l'animale nella hashmap della nuova area, controlla la sua capienza
+            if (_richiesta->areaInteressata->currentAnimalNumber >= _richiesta->areaInteressata->maxCapacity) {
+                free(nuovaOperazione);
+                return ZOO_ERROR_CAPACITY;
+            }
+
+            // Controlla che l'animale sia nell'area iniziale prima di essere spostato
+            if (!hashmap_has_key(nuovaOperazione->vecchiaArea->animaliPresenti, _richiesta->animaleCoinvolto->codice)) {
+                free(nuovaOperazione);
+                return ZOO_ERROR_ANIMAL;
+            }
+
+            // Rimuove l'animale dalla hashmap della vecchia area, e lo aggiunge alla nuova
+            hashmap_remove(nuovaOperazione->vecchiaArea->animaliPresenti, _richiesta->animaleCoinvolto->codice);
+            hashmap_set(_richiesta->areaInteressata->animaliPresenti, _richiesta->animaleCoinvolto->codice, _richiesta->animaleCoinvolto);
 
             // Aggiorna il numero di animali contenuti in vecchiaArea e nuovaArea
             _richiesta->areaInteressata->currentAnimalNumber++;
@@ -368,6 +385,53 @@ int completaRichiesta(zooManager _manager, richiesta _richiesta) {
     _richiesta->stato = COMPLETATA;
     stack_push(_manager->richiesteEffettuate, nuovaOperazione);
 
+    return ZOO_SUCCESS;
+}
+
+
+int annullaUltimaOperazione(zooManager _manager) {
+    if (_manager == NULL) return ZOO_ERROR_NULL;
+
+    // Se non ci sono richieste effettuate
+    if (stack_is_empty(_manager->richiesteEffettuate)) return ZOO_ERROR_NOT_FOUND;
+
+    void* vecchiaOperazione;
+    stack_pop(_manager->richiesteEffettuate, &vecchiaOperazione);
+
+    operazione op = (operazione)vecchiaOperazione;
+
+    switch (op->tipologia) {
+        case VISITA_VETERINARIA:
+            op->animaleCoinvolto->stato = op->statoPrecedente;
+            printf("\nOperazione annullata, stato di %s ripristinato.\n",
+                op->animaleCoinvolto->nome);
+            break;
+
+        case TRASFERIMENTO_ANIMALE:
+            hashmap_remove(op->nuovaArea->animaliPresenti, op->animaleCoinvolto->codice);
+            hashmap_set(op->vecchiaArea->animaliPresenti, op->animaleCoinvolto->codice, op->animaleCoinvolto);
+
+            op->nuovaArea->currentAnimalNumber--;
+            op->vecchiaArea->currentAnimalNumber++;
+
+            op->animaleCoinvolto->area = op->vecchiaArea;
+            printf("\nTrasferimento annullato, %s è stato riportato nell'area %s\n",
+                op->animaleCoinvolto->nome, op->vecchiaArea->nome);
+            break;
+
+        case ALIMENTAZIONE:
+            printf("\nOperazione di alimentazione annullata\n");
+            break;
+
+        case MANUTENZIONE_RECINTO:
+            printf("\nOperazione di manutenzione recinto annullata\n");
+            break;
+
+        case ASSISTENZA_VISITATORI:
+            printf("\nOperazione di assistenza visitatori annullata\n");
+            break;
+    }
+    free(op);
     return ZOO_SUCCESS;
 }
 

@@ -120,8 +120,20 @@ int gestisciRichiesta(zooManager _manager, richiesta* _richiesta_out);
  * @param _manager Manager su cui operare.
  * @param _richiesta Richiesta da completare.
  * @return ZOO_SUCCESS se l'operazione riesce,
- *         ZOO_ERROR_NULL se _manager o _richiesta è NULL
+ *         ZOO_ERROR_NULL se _manager o _richiesta è NULL,
+ *         ZOO_ERROR_NOT_FOUND se _richiesta non è stata ancora presa in carico.
  */
 int completaRichiesta(zooManager _manager, richiesta _richiesta);
+
+
+/* F8
+ * Permette di annullare l'ultima operazione effettuata.
+ * @param _manager Manager su cui operare.
+ * @return ZOO_SUCCESS se l'operazione riesce,
+ *         ZOO_ERROR_NULL se _manager è NULL,
+ *         ZOO_ERROR_NOT_FOUND se non ci sono richieste da annullare.
+ */
+int annullaUltimaOperazione(zooManager _manager);
+
 
 #endif
