@@ -11,7 +11,7 @@ typedef enum {VISITA_VETERINARIA, ALIMENTAZIONE, TRASFERIMENTO_ANIMALE, MANUTENZ
 typedef enum {ALTA, MEDIA, BASSA} priorita;
 typedef enum {IN_ATTESA, IN_CARICO, COMPLETATA} statoRichiesta;
 
-// Helper private function to find an element in the graph
+// Helper private functions
 node_id find_node_by_value(direct_graph _specieAnimali, char* _value);
 
 
@@ -122,11 +122,11 @@ int verificaSpecie(zooManager _manager, char* _specie, char* _famiglia) {
 
     // Check if _specie exists
     node_id specie = find_node_by_value(_manager->classificazione, _specie);
-    if (specie < 0) return ZOO_ERROR_NOT_FOUND;
+    if (specie < 0) return ZOO_ERROR_ANIMAL;
 
     // Check if _famiglia exists
     node_id famiglia = find_node_by_value(_manager->classificazione, _famiglia);
-    if (famiglia < 0) return ZOO_ERROR_NOT_FOUND;
+    if (famiglia < 0) return ZOO_ERROR_FAMILY;
 
     // Check if the path between those 2 nodes exists
     return direct_graph_path_exists(_manager->classificazione, famiglia, specie);
@@ -312,11 +312,14 @@ int gestisciRichiesta(zooManager _manager, richiesta* _richiesta_out) {
     return ZOO_SUCCESS;
 }
 
-int completaRichiesta(zooManager _manager, richiesta _richiesta) {
-    if (_manager == NULL) return ZOO_ERROR_NULL;
-    if (_richiesta == NULL) return ZOO_ERROR_NULL;
 
-    if (_richiesta->stato !=  IN_CARICO) return ZOO_ERROR_NOT_FOUND;
+int completaRichiesta(zooManager _manager) {
+    if (_manager == NULL) return ZOO_ERROR_NULL;
+    if (queue_is_empty(_manager->richiesteInCarico)) return ZOO_ERROR_NOT_FOUND;
+
+    richiesta _richiesta = NULL;
+    dequeue(_manager->richiesteInCarico, (void**)&_richiesta);
+    if (_richiesta == NULL) return ZOO_ERROR_NULL;
 
     operazione nuovaOperazione = malloc(sizeof(struct _operazione));
     if (nuovaOperazione == NULL) return ZOO_ERROR_ALLOC;
@@ -324,6 +327,9 @@ int completaRichiesta(zooManager _manager, richiesta _richiesta) {
    // Salva lo stato della richiesta prima di essere eseguita
     nuovaOperazione->animaleCoinvolto = _richiesta->animaleCoinvolto;
     nuovaOperazione->tipologia = _richiesta->tipologia;
+
+    nuovaOperazione->vecchiaArea = NULL;
+    nuovaOperazione->nuovaArea = NULL;
 
     switch (_richiesta->tipologia) {
         case VISITA_VETERINARIA:
@@ -339,7 +345,6 @@ int completaRichiesta(zooManager _manager, richiesta _richiesta) {
             // Alimentando gli animali nell'area interessata
             printf("Alimentazione effettuata nell'area %s\n", _richiesta->areaInteressata->nome);
             break;
-
 
         case TRASFERIMENTO_ANIMALE:
             // Registra vecchia area e nuova area nell'operazione
@@ -363,7 +368,7 @@ int completaRichiesta(zooManager _manager, richiesta _richiesta) {
             hashmap_set(_richiesta->areaInteressata->animaliPresenti, _richiesta->animaleCoinvolto->codice, _richiesta->animaleCoinvolto);
 
             // Aggiorna il numero di animali contenuti in vecchiaArea e nuovaArea
-            _richiesta->areaInteressata->currentAnimalNumber++;
+            nuovaOperazione->nuovaArea->currentAnimalNumber++;
             nuovaOperazione->vecchiaArea->currentAnimalNumber--;
 
             // Aggiorna la nuova area per l'animale
@@ -446,4 +451,11 @@ node_id find_node_by_value(direct_graph _specieAnimali, char* _value) {
         }
     }
     return DIRECT_GRAPH_ERROR_INVALID_ID;
+}
+
+
+char* getRequestId(richiesta _richiesta) {
+    if (_richiesta == NULL) return NULL;
+
+    return _richiesta->codice;
 }

@@ -43,7 +43,7 @@ zooManager zooManager_create();
  * @param _elemento Elemento da aggiungere
  * @return ZOO_SUCCESS se l'operazione riesce,
  *         ZOO_ERROR_NOT_FOUND se _padre non esiste,
- *         ZOO_ERROR_NULL se _animale è già presente.
+ *         ZOO_ERROR_ALREADY_EXISTS se _animale è già presente.
  */
 int aggiungiElemento(zooManager _manager, char* _padre, char* _elemento);
 
@@ -67,7 +67,8 @@ int verificaSpecie(zooManager _manager, char* _specie, char* _famiglia);
  * @param _maxCapacity Capienza massima dell'area.
  * @return ZOO_SUCCESS se l'operazione riesce,
  *         ZOO_ERROR_AREA se il codice dell'area è già esistente,
- *         ZOO_ERROR_CAPACITY se la capacità non è valida. (Creare parametri per la capacità non valida. EX: if capacity <= 0...)
+ *         ZOO_ERROR_CAPACITY se la capacità non è valida,
+ *         ZOO_ERROR_NULL se _codice, _nome, _tipologia o _manager sono NULL.
  */
 int aggiungiArea(zooManager _manager, char* _codice, char* _nome, char* _tipologia, int _maxCapacity);
 
@@ -84,7 +85,8 @@ int aggiungiArea(zooManager _manager, char* _codice, char* _nome, char* _tipolog
  * @return ZOO_SUCCESS se l'operazione di aggiunta riesce,
  *         ZOO_ERROR_ANIMAL se l'animale è già presente,
  *         ZOO_ERROR_NULL se _manager, codice, nome, specie, areaIniziale o salute sono NULL,
- *         ZOO_ERROR_CAPACITY se la capienza massima dell'area viene superata.
+ *         ZOO_ERROR_CAPACITY se la capienza massima dell'area viene superata,
+ *         ZOO_ERROR_AREA se _areaIniziale non esiste.
  */
 int aggiungiAnimale(zooManager _manager, char* _codice, char* _nome, char* _specie, int _eta, char* _areaIniziale, char* _statoSalute);
 
@@ -120,10 +122,10 @@ int gestisciRichiesta(zooManager _manager, richiesta* _richiesta_out);
  * @param _manager Manager su cui operare.
  * @param _richiesta Richiesta da completare.
  * @return ZOO_SUCCESS se l'operazione riesce,
- *         ZOO_ERROR_NULL se _manager o _richiesta è NULL,
+ *         ZOO_ERROR_NULL se _manager è NULL,
  *         ZOO_ERROR_NOT_FOUND se _richiesta non è stata ancora presa in carico.
  */
-int completaRichiesta(zooManager _manager, richiesta _richiesta);
+int completaRichiesta(zooManager _manager);
 
 
 /* F8
@@ -135,5 +137,12 @@ int completaRichiesta(zooManager _manager, richiesta _richiesta);
  */
 int annullaUltimaOperazione(zooManager _manager);
 
+/*
+ * Funzione d'aiuto per ottenere il codice di una richiesta direttamente dal main.c
+ * @param _richiesta Richiesta di cui restituire il codice.
+ * @return codice di _richiesta se l'operazione riesce,
+ *         NULL se _richiesta non esiste.
+ */
+char* getRequestId(richiesta _richiesta);
 
 #endif
